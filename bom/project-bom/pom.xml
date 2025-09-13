@@ -24,7 +24,7 @@
         <!-- Dependency versions -->
         <version.jakarta.ee>10.0.0</version.jakarta.ee>
         <version.org.jboss.logging>3.6.1.Final</version.org.jboss.logging>
-        <version.weld.api>5.0.SP3</version.weld.api>
+        <version.weld.api>6.0.Final</version.weld.api>
         <version.weld>5.1.6.Final</version.weld>
     </properties>
 
