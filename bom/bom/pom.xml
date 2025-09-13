@@ -1,0 +1,43 @@
+<!--
+  ~ Copyright The RESTEasy Authors
+  ~ SPDX-License-Identifier: Apache-2.0
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>dev.resteasy.netty</groupId>
+        <artifactId>resteasy-netty-parent</artifactId>
+        <version>1.0.0.Final-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>resteasy-netty-bom</artifactId>
+    <packaging>pom</packaging>
+
+    <name>RESTEasy Netty Maven (BOM)</name>
+    <description>User BOM for RESTEasy Netty</description>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>dev.resteasy.netty</groupId>
+                <artifactId>resteasy-netty-embedded-server</artifactId>
+                <version>${project.version</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.resteasy.netty</groupId>
+                <artifactId>resteasy-netty-embedded-server-cdi</artifactId>
+                <version>${project.version</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.resteasy.netty</groupId>
+                <artifactId>resteasy-reactor-netty-client</artifactId>
+                <version>${project.version</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>

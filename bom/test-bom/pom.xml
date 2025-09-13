@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright The RESTEasy Authors
+  ~ SPDX-License-Identifier: Apache-2.0
+  -->
+
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <parent>
+        <groupId>dev.resteasy.netty</groupId>
+        <artifactId>resteasy-netty-parent</artifactId>
+        <version>1.0.0.Final-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>resteasy-netty-test-bom</artifactId>
+    <packaging>pom</packaging>
+    <name>RESTEasy Netty: Test BOM</name>
+
+    <properties>
+        <version.dev.resteasy.junit.extension>1.0.0.Beta1</version.dev.resteasy.junit.extension>
+        <version.org.bouncycastle>1.78.1</version.org.bouncycastle>
+        <version.org.eclipse.parsson>1.1.7</version.org.eclipse.parsson>
+        <version.org.jboss.arquillian.core>1.10.0.Final</version.org.jboss.arquillian.core>
+        <version.org.jboss.arquillian.container.arquillian-weld-embedded>3.0.2.Final</version.org.jboss.arquillian.container.arquillian-weld-embedded>
+        <version.org.junit>5.13.4</version.org.junit>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- First import the production BOM -->
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>resteasy-netty-project-bom</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.arquillian</groupId>
+                <artifactId>arquillian-bom</artifactId>
+                <version>${version.org.jboss.arquillian.core}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${version.org.junit}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>dev.resteasy.junit.extension</groupId>
+                <artifactId>resteasy-junit-extension</artifactId>
+                <version>${version.dev.resteasy.junit.extension}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!-- Needed for testing on SSL connections on Windows -->
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk18on</artifactId>
+                <version>${version.org.bouncycastle}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcpkix-jdk18on</artifactId>
+                <version>${version.org.bouncycastle}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.parsson</groupId>
+                <artifactId>parsson</artifactId>
+                <version>${version.org.eclipse.parsson}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.resteasy</groupId>
+                <artifactId>server-adapter-test-base</artifactId>
+                <version>${version.org.jboss.resteasy}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.arquillian.container</groupId>
+                <artifactId>arquillian-weld-embedded</artifactId>
+                <version>${version.org.jboss.arquillian.container.arquillian-weld-embedded}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.jboss.weld</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>
