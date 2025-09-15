@@ -55,6 +55,7 @@
         <module>bom/test-bom</module>
         <module>embedded-server</module>
         <module>embedded-server-cdi</module>
+        <module>embedded-server-reactor</module>
         <module>reactor-netty-client</module>
     </modules>
 
