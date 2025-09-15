@@ -1,3 +1,8 @@
+/*
+ * Copyright The RESTEasy Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package org.jboss.resteasy.test.resteasy_jaxrs.i18n;
 
 import java.io.InputStream;
@@ -8,13 +13,6 @@ import org.jboss.logging.Logger;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 
-/**
- *
- * @author <a href="ron.sigal@jboss.com">Ron Sigal</a>
- * @version $Revision: 1.1 $
- *
- *          Copyright Oct 8, 2014
- */
 public abstract class TestMessagesParent {
     private static final Logger LOG = Logger.getLogger(TestMessagesParent.class);
     protected static Locale savedLocale;

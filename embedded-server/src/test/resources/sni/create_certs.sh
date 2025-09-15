@@ -1,5 +1,10 @@
 #!/bin/bash
 
+#
+# Copyright The RESTEasy Authors
+# SPDX-License-Identifier: Apache-2.0
+#
+
 echo "==== Removing old files ===="
 find . -name "*.jks" -exec rm -rf {} \;
 

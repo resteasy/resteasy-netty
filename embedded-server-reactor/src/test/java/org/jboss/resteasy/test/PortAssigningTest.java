@@ -1,3 +1,8 @@
+/*
+ * Copyright The RESTEasy Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package org.jboss.resteasy.test;
 
 import org.jboss.resteasy.plugins.server.reactor.netty.ReactorNettyJaxrsServer;

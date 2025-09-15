@@ -1,5 +1,10 @@
 #!/bin/bash -i
 
+#
+# Copyright The RESTEasy Authors
+# SPDX-License-Identifier: Apache-2.0
+#
+
 fail() {
     printf "%s\n\n" "${1}"
     printHelp
