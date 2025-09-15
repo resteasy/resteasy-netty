@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package org.jboss.resteasy.client.jaxrs.internal;
+package dev.resteasy.netty.reactor.engine;
 
 import static java.util.Collections.unmodifiableSet;
 
@@ -30,13 +30,13 @@ import org.jboss.resteasy.util.CaseInsensitiveMap;
  * The get and getFirst methods returns the list(since this is an instance of MultivaluedMap) value of the given key.
  * Any direct changes to the underlying list will not be tracked.
  */
-public class TrackingMap<V> extends CaseInsensitiveMap<V> implements MultivaluedMap<String, V>, Cloneable {
+class TrackingMap<V> extends CaseInsensitiveMap<V> implements MultivaluedMap<String, V>, Cloneable {
 
     private final CaseInsensitiveMap<V> delegate;
     private final Set<String> addedOrUpdatedKeys;
     private final Set<String> removedKeys;
 
-    public TrackingMap(final CaseInsensitiveMap<V> delegate) {
+    TrackingMap(final CaseInsensitiveMap<V> delegate) {
         this(delegate, new HashSet<>(), new HashSet<>());
     }
 

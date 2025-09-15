@@ -3,16 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package org.jboss.resteasy.client.jaxrs.internal;
+package dev.resteasy.netty.reactor.engine;
 
+import org.jboss.resteasy.client.jaxrs.internal.ClientConfiguration;
+import org.jboss.resteasy.client.jaxrs.internal.ClientRequestHeaders;
 import org.jboss.resteasy.util.CaseInsensitiveMap;
 
 /**
  * An extension of ClientRequestHeaders that helps decorate the headers with a TrackingMap.
  */
-public class TrackingClientRequestHeaders extends ClientRequestHeaders {
+class TrackingClientRequestHeaders extends ClientRequestHeaders {
 
-    public TrackingClientRequestHeaders(final ClientConfiguration configuration, final CaseInsensitiveMap<Object> headers) {
+    TrackingClientRequestHeaders(final ClientConfiguration configuration, final CaseInsensitiveMap<Object> headers) {
         super(configuration);
         this.headers = new TrackingMap<>(headers);
     }
