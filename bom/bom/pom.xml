@@ -25,22 +25,22 @@
             <dependency>
                 <groupId>dev.resteasy.netty</groupId>
                 <artifactId>resteasy-netty-embedded-server</artifactId>
-                <version>${project.version</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>dev.resteasy.netty</groupId>
                 <artifactId>resteasy-netty-embedded-server-cdi</artifactId>
-                <version>${project.version</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>dev.resteasy.netty</groupId>
                 <artifactId>resteasy-embedded-server-reactor</artifactId>
-                <version>${project.version</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>dev.resteasy.netty</groupId>
                 <artifactId>resteasy-reactor-netty-client</artifactId>
-                <version>${project.version</version>
+                <version>${project.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
