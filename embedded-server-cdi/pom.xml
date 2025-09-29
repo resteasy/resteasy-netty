@@ -89,13 +89,11 @@
             <artifactId>resteasy-client</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- This needs a new release of RESTEasy 6.2.13+ for this to be included
         <dependency>
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-embedded-server-tests</artifactId>
             <scope>test</scope>
         </dependency>
-        -->
         <dependency>
             <groupId>org.jboss.arquillian.junit5</groupId>
             <artifactId>arquillian-junit5-container</artifactId>

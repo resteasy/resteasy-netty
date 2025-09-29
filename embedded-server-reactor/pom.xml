@@ -132,23 +132,5 @@
             <artifactId>resteasy-jackson2-provider</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- This needs a new release of RESTEasy 6.2.13+ for this to be included
-        <dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-embedded-server-tests</artifactId>
-            <scope>test</scope>
-        </dependency>
-        -->
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <dependenciesToScan>org.jboss.resteasy:resteasy-embedded-server-tests</dependenciesToScan>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>
