@@ -283,6 +283,27 @@
             </build>
         </profile>
         <profile>
+            <id>allow-unsafe</id>
+            <activation>
+                <jdk>(24,]</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>default-test</id>
+                                <configuration>
+                                    <argLine>--sun-misc-unsafe-memory-access=allow</argLine>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
             <id>release</id>
             <activation>
                 <property>
