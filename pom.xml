@@ -86,7 +86,7 @@
         <version.io.netty>4.1.127.Final</version.io.netty>
         <version.io.projectreactor>2024.0.10</version.io.projectreactor>
         <version.org.jboss.logging.jboss-logging-tools>3.0.4.Final</version.org.jboss.logging.jboss-logging-tools>
-        <version.org.jboss.resteasy>6.2.12.Final</version.org.jboss.resteasy>
+        <version.org.jboss.resteasy>6.2.14.Final</version.org.jboss.resteasy>
 
         <!-- Plugins versions -->
         <version.central.publishing.maven.plugin>0.8.0</version.central.publishing.maven.plugin>
