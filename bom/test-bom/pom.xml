@@ -19,7 +19,7 @@
     <name>RESTEasy Netty: Test BOM</name>
 
     <properties>
-        <version.dev.resteasy.junit.extension>1.0.0.Beta1</version.dev.resteasy.junit.extension>
+        <version.dev.resteasy.junit.extension>1.0.0.Beta4</version.dev.resteasy.junit.extension>
         <version.org.bouncycastle>1.81.1</version.org.bouncycastle>
         <version.org.eclipse.parsson>1.1.9</version.org.eclipse.parsson>
         <version.org.jboss.arquillian.core>1.10.2.Final</version.org.jboss.arquillian.core>
