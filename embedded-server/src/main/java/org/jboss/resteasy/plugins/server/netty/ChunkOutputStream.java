@@ -6,6 +6,7 @@
 package org.jboss.resteasy.plugins.server.netty;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -14,9 +15,11 @@ import org.jboss.resteasy.spi.AsyncOutputStream;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.http.DefaultHttpContent;
+import io.netty.util.concurrent.Future;
 
 /**
  * Class to help application that are built to write to an
@@ -43,6 +46,12 @@ public class ChunkOutputStream extends AsyncOutputStream {
     private final ByteBuf buffer;
     private final ChannelHandlerContext ctx;
     private final NettyHttpResponse response;
+    // All lifecycle state below is guarded by writeLock.
+    private int pendingWrites = 0;
+    private Throwable writeFailure = null;
+    private ChannelPromise responsePromise = null;
+    private boolean finishRequested = false;
+    private boolean responseWriteStarted = false;
 
     ChunkOutputStream(final NettyHttpResponse response, final ChannelHandlerContext ctx, final int chunksize) {
         this.response = response;
@@ -56,6 +65,7 @@ public class ChunkOutputStream extends AsyncOutputStream {
     @Override
     public void write(int b) throws IOException {
         synchronized (writeLock) {
+            ensureOpen();
             if (buffer.maxWritableBytes() < 1) {
                 flush();
             }
@@ -67,6 +77,8 @@ public class ChunkOutputStream extends AsyncOutputStream {
         if (response.isCommitted())
             throw new IllegalStateException(Messages.MESSAGES.responseIsCommitted());
         synchronized (writeLock) {
+            if (finishRequested)
+                throw new IllegalStateException(Messages.MESSAGES.responseIsCommitted());
             buffer.clear();
         }
     }
@@ -88,6 +100,7 @@ public class ChunkOutputStream extends AsyncOutputStream {
         int spaceLeftInCurrentChunk;
         MultiPromise mp = new MultiPromise(ctx, promise);
         synchronized (writeLock) {
+            ensureOpen();
             while ((spaceLeftInCurrentChunk = buffer.maxWritableBytes()) < dataLengthLeftToWrite) {
                 buffer.writeBytes(b, dataToWriteOffset, spaceLeftInCurrentChunk);
                 dataToWriteOffset = dataToWriteOffset + spaceLeftInCurrentChunk;
@@ -109,6 +122,7 @@ public class ChunkOutputStream extends AsyncOutputStream {
 
     private void flush(ChannelPromise promise) throws IOException {
         synchronized (writeLock) {
+            ensureOpen();
             int readable = buffer.readableBytes();
             if (readable == 0) {
                 promise.setSuccess();
@@ -116,6 +130,8 @@ public class ChunkOutputStream extends AsyncOutputStream {
             }
             if (!response.isCommitted())
                 response.prepareChunkStream();
+            pendingWrites++;
+            promise.addListener(this::bodyWriteComplete);
             ctx.writeAndFlush(new DefaultHttpContent(buffer.copy()), promise);
             buffer.clear();
         }
@@ -156,5 +172,86 @@ public class ChunkOutputStream extends AsyncOutputStream {
             ret.completeExceptionally(e);
         }
         return ret;
+    }
+
+    /**
+     * Closes the entity-output lifecycle and completes the HTTP response after every body write has completed.
+     * The entity stream can wrap this root stream, hence it is flushed while holding the write lock. Any tail emitted by
+     * that flush is registered before the response is marked as finished.
+     */
+    ChannelFuture finish(OutputStream entityOutputStream) throws IOException {
+        ChannelPromise result;
+        boolean completeResponse;
+        synchronized (writeLock) {
+            if (finishRequested) {
+                return responsePromise;
+            }
+            if (entityOutputStream != null) {
+                entityOutputStream.flush();
+            }
+            finishRequested = true;
+            responsePromise = ctx.newPromise();
+            result = responsePromise;
+            completeResponse = pendingWrites == 0;
+        }
+        if (completeResponse) {
+            completeResponse();
+        }
+        return result;
+    }
+
+    private void ensureOpen() throws IOException {
+        if (finishRequested) {
+            throw new IOException(Messages.MESSAGES.responseIsCommitted());
+        }
+    }
+
+    private void bodyWriteComplete(Future<?> future) {
+        boolean completeResponse;
+        synchronized (writeLock) {
+            pendingWrites--;
+            if (!future.isSuccess() && writeFailure == null) {
+                writeFailure = future.cause() == null
+                        ? new IOException("Response body write failed without a cause")
+                        : future.cause();
+            }
+            completeResponse = finishRequested && pendingWrites == 0;
+        }
+        if (!future.isSuccess()) {
+            // Once body bytes may have reached the peer, only closing the transport can prevent a clean partial response.
+            ctx.close();
+        }
+        if (completeResponse) {
+            completeResponse();
+        }
+    }
+
+    private void completeResponse() {
+        final ChannelPromise result;
+        final Throwable failure;
+        synchronized (writeLock) {
+            if (!finishRequested || pendingWrites != 0 || responseWriteStarted) {
+                return;
+            }
+            responseWriteStarted = true;
+            result = responsePromise;
+            failure = writeFailure;
+        }
+
+        if (failure != null) {
+            ctx.close().addListener(ignored -> result.tryFailure(failure));
+            return;
+        }
+
+        response.writeResponseTermination().addListener(future -> {
+            if (future.isSuccess()) {
+                result.trySuccess();
+            } else {
+                Throwable cause = future.cause() == null
+                        ? new IOException("Response termination write failed without a cause")
+                        : future.cause();
+                ctx.close().addListener(ignored -> result.tryFailure(cause));
+            }
+        });
     }
 }

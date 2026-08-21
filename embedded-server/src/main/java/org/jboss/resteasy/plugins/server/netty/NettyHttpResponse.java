@@ -32,19 +32,28 @@ import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.LastHttpContent;
 
 /**
+ * Body write submission and completion are ordered by the root {@link ChunkOutputStream}'s write lock. Terminal writes
+ * can be requested by RESTEasy dispatch or by an asynchronous Netty promise callback. {@link #sendError(int, String)}
+ * and {@link #writeResponseTermination()} therefore synchronize on this response, making terminal message selection,
+ * write submission and future publication one transition.
+ *
  * @author <a href="mailto:bill@burkecentral.com">Bill Burke</a>
  * @version $Revision: 1 $
  */
 public class NettyHttpResponse implements HttpResponse {
     private static final int EMPTY_CONTENT_LENGTH = 0;
     private int status = 200;
-    private OutputStream os;
+    // RESTEasy writer interceptors can replace this stream with a wrapper around the root stream.
+    private OutputStream entityOutputStream;
+    // The root stream owns the Netty body-write promises and therefore remains stable when the entity stream is replaced.
+    private final ChunkOutputStream rootChunkOutputStream;
     private final MultivaluedMap<String, Object> outputHeaders;
     private final ChannelHandlerContext ctx;
     private boolean committed;
     private final boolean keepAlive;
     private final ResteasyProviderFactory providerFactory;
     private final HttpMethod method;
+    private ChannelFuture terminationFuture;
 
     public NettyHttpResponse(final ChannelHandlerContext ctx, final boolean keepAlive,
             final ResteasyProviderFactory providerFactory) {
@@ -55,15 +64,18 @@ public class NettyHttpResponse implements HttpResponse {
             final ResteasyProviderFactory providerFactory, final HttpMethod method) {
         outputHeaders = new MultivaluedMapImpl<String, Object>();
         this.method = method;
-        os = (method == null || !method.equals(HttpMethod.HEAD)) ? new ChunkOutputStream(this, ctx, 1000) : null; //[RESTEASY-1627]
+        rootChunkOutputStream = (method == null || !method.equals(HttpMethod.HEAD))
+                ? new ChunkOutputStream(this, ctx, 1000)
+                : null; //[RESTEASY-1627]
+        entityOutputStream = rootChunkOutputStream;
         this.ctx = ctx;
         this.keepAlive = keepAlive;
         this.providerFactory = providerFactory;
     }
 
     @Override
-    public void setOutputStream(OutputStream os) {
-        this.os = os;
+    public void setOutputStream(OutputStream entityOutputStream) {
+        this.entityOutputStream = entityOutputStream;
     }
 
     @Override
@@ -83,7 +95,7 @@ public class NettyHttpResponse implements HttpResponse {
 
     @Override
     public OutputStream getOutputStream() throws IOException {
-        return os;
+        return entityOutputStream;
     }
 
     @Override
@@ -97,7 +109,7 @@ public class NettyHttpResponse implements HttpResponse {
     }
 
     @Override
-    public void sendError(int status, String message) throws IOException {
+    public synchronized void sendError(int status, String message) throws IOException {
         if (committed) {
             throw new IllegalStateException();
         }
@@ -116,8 +128,8 @@ public class NettyHttpResponse implements HttpResponse {
         }
         // Add keep alive or connection close header
         transformResponseHeaders(response);
-        ctx.writeAndFlush(response);
         committed = true;
+        terminationFuture = ctx.writeAndFlush(response);
     }
 
     @Override
@@ -157,6 +169,10 @@ public class NettyHttpResponse implements HttpResponse {
         RestEasyHttpResponseEncoder.transformHeaders(this, res, providerFactory);
     }
 
+    /**
+     * Called by {@link ChunkOutputStream} while it holds its write lock. Body-write completion reacquires that lock before
+     * it can request termination, which makes this committed state visible to the completion path.
+     */
     public void prepareChunkStream() {
         committed = true;
         DefaultHttpResponse response = getDefaultHttpResponse();
@@ -165,14 +181,11 @@ public class NettyHttpResponse implements HttpResponse {
     }
 
     public void finish() throws IOException {
-        if (os != null)
-            os.flush();
         ChannelFuture future;
-        if (isCommitted()) {
-            // if committed this means the output stream was used.
-            future = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
+        if (rootChunkOutputStream != null) {
+            future = rootChunkOutputStream.finish(entityOutputStream);
         } else {
-            future = ctx.writeAndFlush(getEmptyHttpResponse());
+            future = writeResponseTermination();
         }
 
         if (!isKeepAlive()) {
@@ -181,10 +194,20 @@ public class NettyHttpResponse implements HttpResponse {
 
     }
 
+    synchronized ChannelFuture writeResponseTermination() {
+        if (terminationFuture != null) {
+            return terminationFuture;
+        }
+        Object terminalMessage = isCommitted() ? LastHttpContent.EMPTY_LAST_CONTENT : getEmptyHttpResponse();
+        committed = true;
+        terminationFuture = ctx.writeAndFlush(terminalMessage);
+        return terminationFuture;
+    }
+
     @Override
     public void flushBuffer() throws IOException {
-        if (os != null)
-            os.flush();
+        if (entityOutputStream != null)
+            entityOutputStream.flush();
         ctx.flush();
     }
 }
