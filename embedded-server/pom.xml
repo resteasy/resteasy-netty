@@ -115,6 +115,11 @@
             <artifactId>resteasy-jaxb-provider</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-jackson2-provider</artifactId>
+            <scope>test</scope>
+        </dependency>
         <!-- This needs a new release of RESTEasy 6.2.13+ for this to be included
         <dependency>
             <groupId>org.jboss.resteasy</groupId>
