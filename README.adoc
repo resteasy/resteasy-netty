@@ -55,7 +55,7 @@ Issues are kept in https://github.com/resteasy/resteasy-netty/issues[GitHub Issu
 
 == Build
 
-Currently, RESTEasy Netty requires JDK 17+ to compile, but compiles to Java 11 bytecode.
+To compile RESTEasy Netty, you need JDK 25 or later. The build produces Java 17 bytecode.
 
 If you want to build the project without running the tests, you need to pull down a clone of the RESTEasy repository and
 run:
@@ -76,13 +76,13 @@ Read the link:./CONTRIBUTING.adoc[Contribution guidelines]
 Releasing the project requires permission to deploy to Maven Central see https://central.sonatype.org/publish/requirements/[Maven Central Release Requirements].
 Once everything is setup, you simply need to run the `./release.sh` script. There are two required parameters:
 
-1. `-r` or `--release` which is the version you want to release
-2. `-d` or `--development` which is the next development version.
+. `-r` or `--release` which is the version you want to release
+. `-d` or `--development` which is the next development version.
 
 By default the release version cannot contain `SNAPSHOT` and the development version, must container `SNAPSHOT`.
 
-[source,bash]
 .Example Command
+[source,bash]
 ----
 ./release -r 1.0.0.Final -d 1.0.1.Final-SNAPSHOT
 ----
@@ -90,33 +90,62 @@ By default the release version cannot contain `SNAPSHOT` and the development ver
 === Supported Arguments
 
 |===
-|Argument | Requires Value | Description
+| Argument                                                                                                          | Requires Value | Description
 
 | `-d`, `--development`
+
 | Yes
+
 | The next version for the development cycle.
 
 | `-f`, `--force`
+
 | No
+
 | Forces to allow a SNAPSHOT suffix in release version and not require one for the development version.
 
 | `-h`, `--help`
-| No
+
+| N/A
+
 | Displays this help
 
+| `--notes-start-tag`
+
+| Unused
+
+| Passes the `--notes-from-tag` and the argument to the `gh create release` command.
+
+| `-p`, `--prerelease`
+
+| Unused
+
+| Passes the `--prerelease` to the `gh create release` command.
+
 | `-r`, `--release`
+
 | Yes
+
 | The version to be released. Also used for the tag.
 
 | `--dry-run`
+
 | No
+
 | Executes the release in as a dry-run. Nothing will be updated or pushed.
 
-| `-v`, `--verbose`
+| `--no-push`
+
 | No
+
+a| Executes the release in, but doesn't actually push the changes to GitHub or publish the release on Maven Central.
+Any next steps should you want to continue the release will need to be manual.
+
+| `-v`, `--verbose`
+
+| No
+
 | Prints verbose output.
-
 |===
-
 
 Any additional arguments are considered arguments for the Maven command.
