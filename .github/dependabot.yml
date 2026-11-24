@@ -10,7 +10,9 @@ updates:
     schedule:
       interval: "daily"
     ignore:
-      - dependency-name: '*'
+      - dependency-name: 'io.netty:*'
+        update-types: ['version-update:semver-major', 'version-update:semver-minor']
+      - dependency-name: 'org.jboss.resteasy:*'
         update-types: ['version-update:semver-major', 'version-update:semver-minor']
     open-pull-requests-limit: 10
   - package-ecosystem: "github-actions"
