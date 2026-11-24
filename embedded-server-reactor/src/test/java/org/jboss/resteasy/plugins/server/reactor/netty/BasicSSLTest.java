@@ -17,9 +17,9 @@ import org.jboss.resteasy.util.PortProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 
-import com.fasterxml.jackson.jakarta.rs.json.JacksonJsonProvider;
-
 import io.netty.handler.ssl.ClientAuth;
+
+import com.fasterxml.jackson.jakarta.rs.json.JacksonJsonProvider;
 
 public class BasicSSLTest extends AbstractBasicTest {
 

@@ -26,9 +26,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.jakarta.rs.json.JacksonJsonProvider;
-
 import io.netty.handler.ssl.ClientAuth;
+
+import com.fasterxml.jackson.jakarta.rs.json.JacksonJsonProvider;
 
 /**
  * Tests to make sure clean up tasks are executed after request is serviced.
