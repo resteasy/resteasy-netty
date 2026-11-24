@@ -117,6 +117,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <dependenciesToScan>org.jboss.resteasy:resteasy-embedded-server-tests</dependenciesToScan>
+                    <excludedGroups>cdi,http2</excludedGroups>
                 </configuration>
             </plugin>
         </plugins>

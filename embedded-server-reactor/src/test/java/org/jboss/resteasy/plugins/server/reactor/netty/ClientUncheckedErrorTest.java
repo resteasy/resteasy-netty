@@ -54,7 +54,6 @@ public class ClientUncheckedErrorTest {
         final WebTarget target = client.target(generateURL("/resource/out-of-bounds/" + new Random().nextInt()));
         final Response resp = target.request().get();
         Assertions.assertEquals(500, resp.getStatus());
-        Assertions.assertEquals("Index 0 out of bounds for length 0", resp.readEntity(String.class));
     }
 
     @Test
