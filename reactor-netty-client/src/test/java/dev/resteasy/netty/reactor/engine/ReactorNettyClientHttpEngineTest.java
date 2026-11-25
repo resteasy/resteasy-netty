@@ -5,7 +5,11 @@
 
 package dev.resteasy.netty.reactor.engine;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -47,7 +51,6 @@ import jakarta.ws.rs.ext.Providers;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.internal.ClientResponse;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -57,6 +60,7 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.util.concurrent.DefaultEventExecutor;
+
 import reactor.core.publisher.Mono;
 import reactor.netty.Connection;
 import reactor.netty.DisposableServer;
@@ -635,7 +639,7 @@ public class ReactorNettyClientHttpEngineTest {
 
         try {
             timeoutClient.target(url("/sleep/500")).request().get();
-            Assertions.fail("timeout exception expected");
+            fail("timeout exception expected");
         } catch (ProcessingException ex) {
             assertTrue(ex.getMessage().contains(
                     "java.util.concurrent.TimeoutException: " +
@@ -652,7 +656,7 @@ public class ReactorNettyClientHttpEngineTest {
 
         try {
             future.get();
-            Assertions.fail("timeout exception expected");
+            fail("timeout exception expected");
         } catch (ExecutionException ex) {
             assertTrue(ex.getMessage().contains("java.util.concurrent.TimeoutException: " +
                     "Did not observe any item or terminal signal within 200ms"));
@@ -668,7 +672,7 @@ public class ReactorNettyClientHttpEngineTest {
 
         try {
             completionStage.toCompletableFuture().get();
-            Assertions.fail("timeout exception expected");
+            fail("timeout exception expected");
         } catch (ExecutionException ex) {
             assertTrue(ex.getMessage().contains("java.util.concurrent.TimeoutException: " +
                     "Did not observe any item or terminal signal within 100ms"));

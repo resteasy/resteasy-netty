@@ -10,13 +10,13 @@
     <parent>
         <groupId>org.jboss</groupId>
         <artifactId>jboss-parent</artifactId>
-        <version>50</version>
+        <version>55</version>
         <relativePath />
     </parent>
 
     <groupId>dev.resteasy.netty</groupId>
     <artifactId>resteasy-netty-parent</artifactId>
-    <version>1.0.1.Final-SNAPSHOT</version>
+    <version>2.0.0.Alpha1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>RESTEasy Netty</name>
@@ -71,11 +71,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-        <!-- Require Java 17 -->
-        <jdk.min.version>17</jdk.min.version>
-        <!-- Compile to Java 11 -->
-        <maven.compiler.release>11</maven.compiler.release>
+        <!-- Compile to Java 17 -->
+        <maven.compiler.release>17</maven.compiler.release>
 
         <!-- print logs to file by default -->
         <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
@@ -86,31 +83,26 @@
         <version.io.netty>4.1.141.Final</version.io.netty>
         <version.io.projectreactor>2024.0.18</version.io.projectreactor>
         <version.org.jboss.logging.jboss-logging-tools>3.0.4.Final</version.org.jboss.logging.jboss-logging-tools>
-        <version.org.jboss.resteasy>6.2.19.Final</version.org.jboss.resteasy>
+        <version.org.jboss.resteasy>7.0.6.Final</version.org.jboss.resteasy>
 
         <!-- Plugins versions -->
-        <version.central.publishing.maven.plugin>0.8.0</version.central.publishing.maven.plugin>
-        <version.formatter.maven.plugin>2.29.0</version.formatter.maven.plugin>
-        <version.impsort.maven.plugin>1.12.0</version.impsort.maven.plugin>
+        <version.spotless-maven-plugin>3.11.0</version.spotless-maven-plugin>
 
         <!-- Test options -->
         <additionalJvmArgs>-Djava.io.tmpdir=${project.build.directory}</additionalJvmArgs>
 
         <!-- maven-release-plugin configuration -->
         <autoVersionSubmodules>true</autoVersionSubmodules>
-        <releaseProfiles>release</releaseProfiles>
+        <releaseProfiles>central-release</releaseProfiles>
         <signTag>true</signTag>
         <tagNameFormat>v@{project.version}</tagNameFormat>
         <arguments>-DskipTests</arguments>
         <!-- Do not push changes by default when using the maven-release-plugin:prepare -->
-        <pushChanges>true</pushChanges>
+        <pushChanges>false</pushChanges>
         <!-- Use the local directory when using perform -->
         <localCheckout>true</localCheckout>
         <!-- Maven Central properties -->
-        <repo.sonatype.url>https://central.sonatype.com</repo.sonatype.url>
-        <sonatype.server.id>central</sonatype.server.id>
-        <autoPublish>true</autoPublish>
-        <waitUntil>validated</waitUntil>
+        <central.deploymentName>resteasy-netty-${project.version}</central.deploymentName>
     </properties>
 
     <build>
@@ -194,51 +186,82 @@
             </plugin>
             <!-- Format source files -->
             <plugin>
-                <groupId>net.revelc.code.formatter</groupId>
-                <artifactId>formatter-maven-plugin</artifactId>
-                <version>${version.formatter.maven.plugin}</version>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>${version.spotless-maven-plugin}</version>
                 <dependencies>
                     <dependency>
                         <groupId>dev.resteasy.tools</groupId>
                         <artifactId>ide-config</artifactId>
-                        <version>3</version>
+                        <version>4</version>
                     </dependency>
                 </dependencies>
                 <configuration>
-                    <!-- store outside of target to speed up formatting when mvn clean is used -->
-                    <cachedir>.cache</cachedir>
-                    <configFile>eclipse-code-formatter.xml</configFile>
-                    <configXmlFile>resteasy-xml.properties</configXmlFile>
-                    <lineEnding>LF</lineEnding>
-                    <includeResources>true</includeResources>
-                    <removeTrailingWhitespace>true</removeTrailingWhitespace>
+                    <upToDateChecking>
+                        <enabled>true</enabled>
+                        <indexFile>${project.basedir}/.cache/spotless-index-${version.spotless-maven-plugin}</indexFile>
+                    </upToDateChecking>
+                    <java>
+                        <eclipse>
+                            <file>eclipse-code-formatter.xml</file>
+                        </eclipse>
+                        <importOrder>
+                            <order>\#,java,javax,jakarta,org,io,dev,com,net</order>
+                        </importOrder>
+                        <removeUnusedImports>
+                            <!-- default one fails to process the classes -->
+                            <engine>cleanthat-javaparser-unnecessaryimport</engine>
+                        </removeUnusedImports>
+                        <forbidWildcardImports />
+                        <trimTrailingWhitespace />
+                        <endWithNewline />
+                        <licenseHeader>
+                            <file>license-java-asl-header</file>
+                            <!-- Delimiter is a regex which identifies the "top" of the file i.e. all above it is considered a header -->
+                            <delimiter>(\n)*^(\/\/tag.+|\/\/spotless.+|package .+;|module .+;|\/\/.+|\/\*\*.*)$</delimiter>
+                        </licenseHeader>
+                        <replaceRegex>
+                            <name>Remove wildcard imports</name>
+                            <searchRegex>^import\s+[^\*\s]+\*;$</searchRegex>
+                            <replacement>$1</replacement>
+                        </replaceRegex>
+                    </java>
+                    <formats>
+                        <format>
+                            <includes>
+                                <include>pom.xml</include>
+                                <include>src/**/*.xml</include>
+                            </includes>
+                            <trimTrailingWhitespace />
+                            <endWithNewline />
+                            <licenseHeader>
+                                <file>license-xml-asl-header</file>
+                                <!-- Delimiter is a regex which identifies the "top" of the file i.e. all above it is considered a header -->
+                                <delimiter><![CDATA[(\n)*^(<[^!?]+|<!DOCTYPE.+)$]]></delimiter>
+                                <skipLinesMatching><![CDATA[<\?xml.+\?>]]></skipLinesMatching>
+                            </licenseHeader>
+                            <indent>
+                                <spaces>true</spaces>
+                                <spacesPerTab>4</spacesPerTab>
+                            </indent>
+                        </format>
+                    </formats>
+                    <asciidoc>
+                        <includes>
+                            <include>**/*.adoc</include>
+                        </includes>
+
+                        <adocfmt>
+                            <normalizeListBullets>true</normalizeListBullets>
+                            <normalizeOrderedListMarkers>true</normalizeOrderedListMarkers>
+                            <ensureSourceDelimiters>true</ensureSourceDelimiters>
+                        </adocfmt>
+                    </asciidoc>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>format</id>
                         <goals>
-                            <goal>format</goal>
-                        </goals>
-                        <phase>process-sources</phase>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>net.revelc.code</groupId>
-                <artifactId>impsort-maven-plugin</artifactId>
-                <version>${version.impsort.maven.plugin}</version>
-                <configuration>
-                    <!-- store outside of target to speed up formatting when mvn clean is used -->
-                    <cachedir>.cache</cachedir>
-                    <groups>java.,javax.,jakarta.,org.,com.</groups>
-                    <staticGroups>*</staticGroups>
-                    <removeUnused>true</removeUnused>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>sort-imports</id>
-                        <goals>
-                            <goal>sort</goal>
+                            <goal>apply</goal>
                         </goals>
                         <phase>process-sources</phase>
                     </execution>
@@ -254,24 +277,11 @@
                 <plugins>
                     <!-- Validate formatting -->
                     <plugin>
-                        <groupId>net.revelc.code.formatter</groupId>
-                        <artifactId>formatter-maven-plugin</artifactId>
+                        <groupId>com.diffplug.spotless</groupId>
+                        <artifactId>spotless-maven-plugin</artifactId>
                         <executions>
                             <execution>
                                 <id>validate-format</id>
-                                <phase>validate</phase>
-                                <goals>
-                                    <goal>validate</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>net.revelc.code</groupId>
-                        <artifactId>impsort-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>check-import-sort</id>
                                 <phase>validate</phase>
                                 <goals>
                                     <goal>check</goal>
@@ -299,107 +309,6 @@
                                 </configuration>
                             </execution>
                         </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>release</id>
-            <activation>
-                <property>
-                    <name>release</name>
-                </property>
-            </activation>
-
-            <distributionManagement>
-                <snapshotRepository>
-                    <id>${sonatype.server.id}</id>
-                    <url>${repo.sonatype.url}</url>
-                </snapshotRepository>
-                <repository>
-                    <id>${sonatype.server.id}</id>
-                    <url>${repo.sonatype.url}</url>
-                </repository>
-            </distributionManagement>
-
-            <build>
-                <plugins>
-                    <!-- Semantically ordered -->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-enforcer-plugin</artifactId>
-                        <configuration>
-                            <rules>
-                                <requireReleaseDeps>
-                                    <message>No Snapshots Allowed!</message>
-                                </requireReleaseDeps>
-                            </rules>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>attach-sources</id>
-                                <goals>
-                                    <goal>jar-no-fork</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <configuration>
-                            <additionalOptions>
-                                <additionalOption>-html5</additionalOption>
-                            </additionalOptions>
-                            <detectLinks>true</detectLinks>
-                            <doclint>none</doclint>
-                            <failOnError>false</failOnError>
-                            <show>public</show>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>attach-javadocs</id>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                                <configuration>
-                                    <!-- Prevent gpg from using pinentry programs -->
-                                    <gpgArguments>
-                                        <arg>--pinentry-mode</arg>
-                                        <arg>loopback</arg>
-                                    </gpgArguments>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.sonatype.central</groupId>
-                        <artifactId>central-publishing-maven-plugin</artifactId>
-                        <version>${version.central.publishing.maven.plugin}</version>
-                        <extensions>true</extensions>
-                        <configuration>
-                            <publishingServerId>${sonatype.server.id}</publishingServerId>
-                            <autoPublish>${autoPublish}</autoPublish>
-                            <waitUntil>${waitUntil}</waitUntil>
-                            <deploymentName>${project.groupId}-${project.artifactId}-${project.version}</deploymentName>
-                        </configuration>
                     </plugin>
                 </plugins>
             </build>

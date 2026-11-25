@@ -15,9 +15,6 @@ import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
@@ -26,6 +23,9 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.codec.http.LastHttpContent;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 class ChunkOutputStreamProductionTruncationTest {
 

@@ -5,7 +5,9 @@
 
 package org.jboss.resteasy.plugins.server.reactor.netty;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.RETURNS_MOCKS;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.BufferedReader;
 import java.io.IOException;

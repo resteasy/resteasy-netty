@@ -43,9 +43,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import dev.resteasy.netty.reactor.engine.ReactorNettyClientHttpEngine;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.DefaultEventExecutor;
+
+import dev.resteasy.netty.reactor.engine.ReactorNettyClientHttpEngine;
+
 import reactor.core.publisher.Mono;
 import reactor.netty.ConnectionObserver;
 import reactor.netty.DisposableServer;
